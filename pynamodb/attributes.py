@@ -492,6 +492,8 @@ class NumberAttribute(Attribute):
         """
         Decode numbers from JSON
         """
+        if value is None:
+            return None
         return json.loads(value)
 
 
