@@ -341,8 +341,12 @@ class Connection(object):
         except ClientError as e:
             resp_metadata = e.response.get('ResponseMetadata', {}).get('HTTPHeaders', {})
             cancellation_reasons = e.response.get('CancellationReasons', [])
+            item = e.response.get('Item')
 
             botocore_props = {'Error': e.response.get('Error', {})}
+            if item:
+                botocore_props['Item'] = item
+
             verbose_props = {
                 'request_id': resp_metadata.get('x-amzn-requestid', ''),
                 'table_name': self._get_table_name_for_error_context(operation_kwargs),
@@ -737,7 +741,7 @@ class Connection(object):
         """
         Builds the return values map that is common to several operations
         """
-        if return_values_on_condition_failure.upper() not in RETURN_VALUES_VALUES:
+        if return_values_on_condition_failure.upper() not in RETURN_VALUES_ON_CONDITION_FAILURE_VALUES:
             raise ValueError("{} must be one of {}".format(
                 RETURN_VALUES_ON_CONDITION_FAILURE,
                 RETURN_VALUES_ON_CONDITION_FAILURE_VALUES
@@ -889,6 +893,7 @@ class Connection(object):
         return_values: Optional[str] = None,
         return_consumed_capacity: Optional[str] = None,
         return_item_collection_metrics: Optional[str] = None,
+        return_values_on_condition_failure: Optional[str] = None,
     ) -> Dict:
         """
         Performs the PutItem operation and returns the result
@@ -902,12 +907,13 @@ class Connection(object):
             condition=condition,
             return_values=return_values,
             return_consumed_capacity=return_consumed_capacity,
-            return_item_collection_metrics=return_item_collection_metrics
+            return_item_collection_metrics=return_item_collection_metrics,
+            return_values_on_condition_failure=return_values_on_condition_failure
         )
         try:
             return self.dispatch(PUT_ITEM, operation_kwargs)
         except BOTOCORE_EXCEPTIONS as e:
-            raise PutError("Failed to put item: {}".format(e), e)
+            raise PutError("Failed to put item: {}".format(e), e, getattr(e, 'response', {}).get('Item'))
 
     def _get_transact_operation_kwargs(
         self,
