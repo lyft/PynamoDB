@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    'botocore>=1.12.54',
+    'botocore>=1.26.0',
     'typing-extensions>=4; python_version<"3.11"',
 ]
 
@@ -12,7 +12,7 @@ setup(
     packages=find_packages(exclude=('examples', 'tests', 'typing_tests', 'tests.integration',)),
     url='http://jlafon.io/pynamodb.html',
     project_urls={
-        'Source': 'https://github.com/pynamodb/PynamoDB',
+        'Source': 'https://github.com/lyft/PynamoDB',
     },
     author='Jharrod LaFon',
     author_email='jlafon@eyesopen.com',
